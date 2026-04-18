@@ -61,8 +61,8 @@ export function systemHooks() {
    Hooks.on("blackFlag.postRollDamage", async (rolls, data) => {
       const roll = rolls[0];
       const activity = data.subject;
-      const hit = !!(actorHits?.[activity.relativeID] ?? true);
-      if (actorHits) delete actorHits[activity.relativeID];
+      //const hit = !!(activity.actorHits?.[activity.relativeID] ?? true);
+      //if (actorHits) delete actorHits[activity.relativeID];
       if (activity?.description?.includes("[noaa]")) return;
       const playOnDamage = game.settings.get("autoanimations", "playonDamageCore");
       //TODO: Legacy filter check; verify if modern system needs AOE/Heal guards.
@@ -79,7 +79,6 @@ export function systemHooks() {
          activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
       damageV2(
          await getRequiredData({
-            hit: hit,
             item,
             actor: item.parent,
             activity,
