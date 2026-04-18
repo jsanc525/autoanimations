@@ -37,4 +37,4 @@ export * as deathinspace from "./aa-deathinspace.js";
 export * as daggerheart from "./aa-daggerheart.js";
 export * as fantasticdepths from "./aa-fade.js";
 export * as gurps from "./aa-gurps.js";
-export * as "black-flag" from "./aa-blackflag.js";
+export * as blackflag from "./aa-blackflag.js";
