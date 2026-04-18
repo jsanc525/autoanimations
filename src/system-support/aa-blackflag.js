@@ -65,6 +65,9 @@ export function systemHooks() {
       //if (actorHits) delete actorHits[activity.relativeID];
       if (activity?.description?.includes("[noaa]")) return;
       const playOnDamage = game.settings.get("autoanimations", "playonDamageCore");
+      if (!playOnDamage) {
+         return;
+      }
       //TODO: Legacy filter check; verify if modern system needs AOE/Heal guards.
       //if (
       //   Object.keys(CONFIG.blackFlag.areaTargetTypes).includes(activity?.target?.template?.type) ||
