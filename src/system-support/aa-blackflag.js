@@ -58,7 +58,7 @@ export function systemHooks() {
          }),
       );
    });
-   Hooks.on("blackFlag.rollDamage", async (rolls, data) => {
+   Hooks.on("blackFlag.postRollDamage", async (rolls, data) => {
       const roll = rolls[0];
       const activity = data.subject;
       const hit = !!(actorHits?.[activity.relativeID] ?? true);
