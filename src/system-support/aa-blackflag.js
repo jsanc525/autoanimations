@@ -32,6 +32,13 @@ export function systemHooks() {
       //) {
       //   return;
       //}
+      const activityType = activity.type?.toLowerCase();
+      //const hasDamage = activity.hasDamage || activity.system?.damage?.parts?.length > 0;
+      const isHeal = activity.type === "heal";
+      if (isHeal || playOnDamage) {
+         debug("Black Flag | Heal/Damage Gate Triggered: Skipping Use animation to prevent double-play.");
+         return;
+      }
       const item = activity?.item;
       criticalCheck(roll, item);
       const ammoItem = item?.parent?.items?.get(data?.ammoUpdate?.id) ?? null;
@@ -65,6 +72,7 @@ export function systemHooks() {
       //) {
       //   return;
       //}
+
       const item = activity?.item;
       criticalCheck(roll, item);
       const overrideNames =
@@ -84,7 +92,6 @@ export function systemHooks() {
    });
    Hooks.on("blackFlag.postActivityConsumption", async (activity, usageConfig, results) => {
       if (activity?.description?.includes("[noaa]")) return;
-
       const activityType = activity.type?.toLowerCase();
       const isAttack = activity.type === "attack";
       const hasDamage = activity.hasDamage || activity.system?.damage?.parts?.length > 0;
