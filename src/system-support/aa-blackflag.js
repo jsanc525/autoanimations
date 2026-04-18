@@ -84,11 +84,13 @@ export function systemHooks() {
    });
    Hooks.on("blackFlag.postActivityConsumption", async (activity, usageConfig, results) => {
       if (activity?.description?.includes("[noaa]")) return;
-      if (
-         Object.keys(CONFIG.BlackFlag.areaOfEffectTypes).includes(activity?.target?.template?.type) ||
-         activity?.damage?.parts?.length ||
-         activity?.type == "heal"
-      ) {
+
+      const activityType = activity.type?.toLowerCase();
+      const isAttack = activity.type === "attack";
+      const hasDamage = activity.hasDamage || activity.system?.damage?.parts?.length > 0;
+      const isHeal = activity.type === "heal";
+      if (isAttack || hasDamage || isHeal) {
+         debug("Black Flag | Gate Triggered: Skipping Use animation to prevent double-play.");
          return;
       }
       const config = usageConfig;
