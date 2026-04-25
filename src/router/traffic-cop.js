@@ -127,6 +127,7 @@ export async function trafficCop(handler) {
             case "pf2e":
             case "sw5e":
             case "tormenta20":
+            case "black-flag":
                 aaTemplateHook = Hooks.once("createMeasuredTemplate", async (template) => {
                     //Hooks.callAll("aa.preAnimationStart", sanitizedData, data);
                     await wait(500)

@@ -468,8 +468,9 @@ class AAGameSettings extends TJSGameSettingsWithUI {
             });
             break;
 
+         case "black-flag":
          case 'dnd5e':
-         
+
             settings.push({
                namespace,
                key: 'playonDamageCore',
@@ -483,7 +484,7 @@ class AAGameSettings extends TJSGameSettingsWithUI {
                   config: true,
                }
             });
-            
+
             settings.push({
                namespace,
                key: 'playonmiss',
@@ -553,7 +554,7 @@ class AAGameSettings extends TJSGameSettingsWithUI {
                   filePicker: 'imagevideo'
                }
             });
-            
+
             break;
          case 'sw5e':
             if (game.modules.get('midi-qol')?.active) {
