@@ -9,11 +9,14 @@ const sysName = "Black Flag";
 const checkVer = "1.9";
 const sysMinVer = "2.0";
 
+let areaTypes = null;
+
 // Black Flag System hooks provided to run animations
 export function systemHooks() {
    if (!foundry.utils.isNewerVersion(game.system.version, checkVer)) {
       return ui.notifications.error(
-         `${modName}: This version of ${modName} requires ${sysName} ` + `${sysMinVer} or higher`,
+         `${modName}: This version of ${modName} requires ${sysName} ` +
+         `${sysMinVer} or higher`,
          { permanent: true },
       );
    }
@@ -23,27 +26,29 @@ export function systemHooks() {
       const activity = data.subject;
       const actorHits = {};
       actorHits[activity.relativeID] = hit;
+      areaTypes ??= Object.keys(CONFIG.BlackFlag.areaOfEffectTypes)
+      // Check for user set no animations flag
       if (activity?.description?.includes("[noaa]")) return;
-      const playOnDamage = game.settings.get("autoanimations", "playonDamageCore");
-      //TODO: Legacy filter check; verify if modern system needs AOE/Heal guards.
-      //if (
-      //   Object.keys(CONFIG.BlackFlag.areaTargetTypes).includes(activity?.target?.template?.type) ||
-      //   (activity?.damage?.parts?.length && activity?.type != "heal" && playOnDamage)
-      //) {
-      //   return;
-      //}
-      const activityType = activity.type?.toLowerCase();
-      //const hasDamage = activity.hasDamage || activity.system?.damage?.parts?.length > 0;
-      const isHeal = activity.type === "heal";
-      if (isHeal || playOnDamage) {
-         debug("Black Flag | Heal/Damage Gate Triggered: Skipping Use animation to prevent double-play.");
+      const playOnDamage = game.settings.get(
+         "autoanimations", "playonDamageCore"
+      );
+      // Skip if AOE or playOnDamage enabled
+      if (
+         areaTypes.includes(activity?.target?.template?.type) ||
+         (activity?.system?.damage?.parts?.length &&
+            activity?.type != "heal" &&
+            playOnDamage)
+      ) {
+         debug("AA | Attack is AOE or playOnDamage is true. Skipping Animation")
          return;
       }
       const item = activity?.item;
       criticalCheck(roll, item);
       const ammoItem = item?.parent?.items?.get(data?.ammoUpdate?.id) ?? null;
       const overrideNames =
-         activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
+         activity?.name &&
+         !["heal", "summon"].includes(activity?.name?.trim()) ?
+         [activity.name] : [];
       attackV2(
          await getRequiredData({
             item: item,
@@ -64,22 +69,21 @@ export function systemHooks() {
       //const hit = !!(activity.actorHits?.[activity.relativeID] ?? true);
       //if (actorHits) delete actorHits[activity.relativeID];
       if (activity?.description?.includes("[noaa]")) return;
-      const playOnDamage = game.settings.get("autoanimations", "playonDamageCore");
+      const playOnDamage = game.settings.get(
+         "autoanimations", "playonDamageCore"
+      );
+      areaTypes ??= Object.keys(CONFIG.BlackFlag.areaOfEffectTypes)
+      // Damage animations only on playOnDamage
       if (!playOnDamage) {
          return;
       }
-      //TODO: Legacy filter check; verify if modern system needs AOE/Heal guards.
-      //if (
-      //   Object.keys(CONFIG.blackFlag.areaTargetTypes).includes(activity?.target?.template?.type) ||
-      //   (activity?.type == "attack" && !playOnDamage)
-      //) {
-      //   return;
-      //}
 
       const item = activity?.item;
       criticalCheck(roll, item);
       const overrideNames =
-         activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
+         activity?.name &&
+         !["heal", "summon"].includes(activity?.name?.trim()) ?
+         [activity.name] : [];
       damageV2(
          await getRequiredData({
             item,
@@ -92,21 +96,35 @@ export function systemHooks() {
          }),
       );
    });
-   Hooks.on("blackFlag.postActivityConsumption", async (activity, usageConfig, results) => {
+   Hooks.on(
+      "blackFlag.postActivityConsumption",
+      async (activity, usageConfig, results) => {
+      // Check for user set no animations flag
       if (activity?.description?.includes("[noaa]")) return;
-      const activityType = activity.type?.toLowerCase();
-      const isAttack = activity.type === "attack";
-      const hasDamage = activity.hasDamage || activity.system?.damage?.parts?.length > 0;
-      const isHeal = activity.type === "heal";
-      if (isAttack || hasDamage || isHeal) {
-         debug("Black Flag | Gate Triggered: Skipping Use animation to prevent double-play.");
+      areaTypes ??= Object.keys(CONFIG.BlackFlag.areaOfEffectTypes)
+
+      const playOnDamage = game.settings.get(
+         "autoanimations", "playonDamageCore"
+      );
+      // Skip if AOE or playOnDamage enabled
+      if (
+         areaTypes.includes(activity?.target?.template?.type) ||
+         (activity?.system?.damage?.parts?.length &&
+            playOnDamage) ||
+            activity?.type === "attack"
+      ) {
+         debug(
+            "AA | Type Attack, AOE, or playOnDamage is true. Skipping Animation"
+         )
          return;
       }
       const config = usageConfig;
       const options = results;
       const item = activity?.item;
       const overrideNames =
-         activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
+         activity?.name &&
+         !["heal", "summon"].includes(activity?.name?.trim()) ?
+         [activity.name] : [];
       useItem(
          await getRequiredData({
             item,
@@ -119,9 +137,10 @@ export function systemHooks() {
          }),
       );
    });
-   Hooks.on("blackFlag.preActivityConsumption", (activity, config) => {
-      if (activity?.description?.includes("[noaa]")) return;
-      //TODO: Blackflag does not currently autodelete items
+   //TODO: BlackFlag does not currently autodestroy items. Hook not currently
+   // neede?
+   //Hooks.on("blackFlag.preActivityConsumption", (activity, config) => {
+      //if (activity?.description?.includes("[noaa]")) return;
       //if (activity.item?.system?.uses?.autoDestroy) activityCache[activity.uuid] = activity;
       //setTimeout(() => {
       //   if (activityCache[activity.uuid]) delete activityCache[activity.uuid];
@@ -135,7 +154,8 @@ export function systemHooks() {
          return;
       }
       const activity =
-         fromUuidSync(template.flags?.["black-flag"]?.origin) ?? activityCache[template.flags?.["black-flag"]?.origin];
+         fromUuidSync(template.flags?.["black-flag"]?.origin) ??
+         activityCache[template.flags?.["black-flag"]?.origin];
       if (!activity) {
          debug("AA DEBUG | Exit: No Activity found for UUID");
          return;
@@ -144,10 +164,15 @@ export function systemHooks() {
          debug("AA DEBUG | Exit: [noaa] tag detected");
          return;
       }
-      debug("AA DEBUG | Proceeding to templateAnimation with activity:", activity.name);
+      debug(
+         "AA DEBUG | Proceeding to templateAnimation with activity:",
+         activity.name
+      );
       const item = activity?.item;
       const overrideNames =
-         activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
+         activity?.name &&
+         !["heal", "summon"].includes(activity?.name?.trim()) ?
+         [activity.name] : [];
       templateAnimation(
          await getRequiredData({
             item,
@@ -217,18 +242,27 @@ function criticalCheck(roll, item = {}) {
    const token = canvas.tokens.get(roll.tokenId) || getTokenFromItem(item);
 
    const critAnim = game.settings.get("autoanimations", "CriticalAnimation");
-   const critMissAnim = game.settings.get("autoanimations", "CriticalMissAnimation");
+   const critMissAnim = game.settings.get(
+      "autoanimations", "CriticalMissAnimation"
+   );
 
    switch (true) {
       case game.settings.get("autoanimations", "EnableCritical") && critical:
-         new Sequence({ moduleName: "Automated Animations", softFail: !game.settings.get("autoanimations", "debug") })
+         new Sequence(
+            {
+               moduleName: "Automated Animations",
+               softFail: !game.settings.get("autoanimations", "debug")
+            })
             .effect()
             .file(critAnim)
             .atLocation(token)
             .play();
          break;
       case game.settings.get("autoanimations", "EnableCriticalMiss") && fumble:
-         new Sequence({ moduleName: "Automated Animations", softFail: !game.settings.get("autoanimations", "debug") })
+         new Sequence({
+            moduleName: "Automated Animations",
+            softFail: !game.settings.get("autoanimations", "debug")
+         })
             .effect()
             .file(critMissAnim)
             .atLocation(token)
@@ -239,7 +273,9 @@ function criticalCheck(roll, item = {}) {
    function getTokenFromItem(item) {
       const token = item?.parent?.token;
       if (token) return token;
-      const tokens = canvas.tokens.placeables.filter((token) => token.actor?.items?.get(item.id));
+      const tokens = canvas.tokens.placeables.filter(
+         (token) => token.actor?.items?.get(item.id)
+      );
       const fallBack = tokens[0];
       const mostLikely = tokens.find((x) => x.id === _token.id);
       return mostLikely ?? fallBack;
