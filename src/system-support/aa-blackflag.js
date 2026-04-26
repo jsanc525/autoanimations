@@ -127,24 +127,24 @@ export function systemHooks() {
       //   if (activityCache[activity.uuid]) delete activityCache[activity.uuid];
       //}, 60000);
    });
-   //TODO
+
    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
-      console.log("AA DEBUG | Hook Triggered");
+      debug("AA DEBUG | Hook Triggered");
       if (userId !== game.user.id) {
-         console.log("AA DEBUG | Exit: Wrong User");
+         debug("AA DEBUG | Exit: Wrong User");
          return;
       }
       const activity =
          fromUuidSync(template.flags?.["black-flag"]?.origin) ?? activityCache[template.flags?.["black-flag"]?.origin];
       if (!activity) {
-         console.log("AA DEBUG | Exit: No Activity found for UUID");
+         debug("AA DEBUG | Exit: No Activity found for UUID");
          return;
       }
       if (activity?.description?.includes("[noaa]")) {
-         console.log("AA DEBUG | Exit: [noaa] tag detected");
+         debug("AA DEBUG | Exit: [noaa] tag detected");
          return;
       }
-      console.log("AA DEBUG | Proceeding to templateAnimation with activity:", activity.name);
+      debug("AA DEBUG | Proceeding to templateAnimation with activity:", activity.name);
       const item = activity?.item;
       const overrideNames =
          activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
@@ -165,7 +165,7 @@ async function useItem(input) {
    debug("Item used, checking for animations");
    const handler = await AAHandler.make(input);
    if (!handler?.item || !handler?.sourceToken) {
-      console.log("Automated Animations: No Item or Source Token", handler);
+      debug("Automated Animations: No Item or Source Token", handler);
       return;
    }
    trafficCop(handler);
@@ -176,7 +176,7 @@ async function attackV2(input) {
    debug("Attack rolled, checking for animations");
    const handler = await AAHandler.make(input);
    if (!handler?.item || !handler?.sourceToken) {
-      console.log("Automated Animations: No Item or Source Token", handler);
+      debug("Automated Animations: No Item or Source Token", handler);
       return;
    }
    trafficCop(handler);
@@ -187,12 +187,12 @@ async function damageV2(input) {
    debug("Damage rolled, checking for animations");
    const handler = await AAHandler.make(input);
    if (!handler?.item || !handler?.sourceToken) {
-      console.log("Automated Animations: No Item or Source Token", handler);
+      debug("Automated Animations: No Item or Source Token", handler);
       return;
    }
    trafficCop(handler);
 }
-//TODO
+
 async function templateAnimation(input) {
    debug("Template placed, checking for animations");
    if (!input.item) {
