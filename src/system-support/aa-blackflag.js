@@ -135,7 +135,7 @@ export function systemHooks() {
          return;
       }
       const activity =
-         fromUuidSync(template.flags?.blackFlag?.origin) ?? activityCache[template.flags?.blackFlag?.origin];
+         fromUuidSync(template.flags?.["black-flag"]?.origin) ?? activityCache[template.flags?.["black-flag"]?.origin];
       if (!activity) {
          console.log("AA DEBUG | Exit: No Activity found for UUID");
          return;
