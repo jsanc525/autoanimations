@@ -129,13 +129,22 @@ export function systemHooks() {
    });
    //TODO
    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
+      console.log("AA DEBUG | Hook Triggered");
       if (userId !== game.user.id) {
+         console.log("AA DEBUG | Exit: Wrong User");
          return;
       }
       const activity =
          fromUuidSync(template.flags?.blackFlag?.origin) ?? activityCache[template.flags?.blackFlag?.origin];
-      if (!activity) return;
-      if (activity?.description?.includes("[noaa]")) return;
+      if (!activity) {
+         console.log("AA DEBUG | Exit: No Activity found for UUID");
+         return;
+      }
+      if (activity?.description?.includes("[noaa]")) {
+         console.log("AA DEBUG | Exit: [noaa] tag detected");
+         return;
+      }
+      console.log("AA DEBUG | Proceeding to templateAnimation with activity:", activity.name);
       const item = activity?.item;
       const overrideNames =
          activity?.name && !["heal", "summon"].includes(activity?.name?.trim()) ? [activity.name] : [];
