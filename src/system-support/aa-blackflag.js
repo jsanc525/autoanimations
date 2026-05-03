@@ -138,14 +138,14 @@ export function systemHooks() {
       );
    });
    //TODO: BlackFlag does not currently autodestroy items. Hook not currently
-   // neede?
+   // needed?
    //Hooks.on("blackFlag.preActivityConsumption", (activity, config) => {
       //if (activity?.description?.includes("[noaa]")) return;
       //if (activity.item?.system?.uses?.autoDestroy) activityCache[activity.uuid] = activity;
       //setTimeout(() => {
       //   if (activityCache[activity.uuid]) delete activityCache[activity.uuid];
       //}, 60000);
-   });
+   //});
 
    Hooks.on("createMeasuredTemplate", async (template, data, userId) => {
       debug("AA DEBUG | Hook Triggered");
